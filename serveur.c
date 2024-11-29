@@ -48,7 +48,6 @@ void* thread_recv(void* arg){
             
             nombre_client--;
             
-            // ID_client=0;
             pthread_exit(NULL);           
         }
         else{
@@ -57,7 +56,7 @@ void* thread_recv(void* arg){
             {
                 if (tab_client[i]==ID_client)
                 {
-                    send(tab_client[i],"Votre msg a bien été envoyé\n",32,0);perror("send a l'envoyeur du msg");
+                    send(tab_client[i],"[OK]\n",6,0);perror("send a l'envoyeur du msg");
                 }  
                 else
                 {
@@ -78,9 +77,11 @@ void* thread_accept(){
         struct sockaddr_in client_addr;
         socklen_t len;
         client_fd = accept(server_fd,(struct sockaddr*)&client_addr,&len);perror("accept");
-
         if (client_fd==-1) pthread_exit(NULL);
+
         tab_client[nombre_client]=client_fd;
+
+        send(client_fd,"Acces to server : OK ! Now you can chat online.\n",49,0);perror("send server OK !");
     
         pthread_t thread_receive;
         pthread_create(&thread_receive,NULL,thread_recv,(void*)tab_client[nombre_client]); 
@@ -117,18 +118,19 @@ int main(){
     pthread_create(&thread,NULL,thread_accept,NULL);
 
     while (1)
-    {
-        
+    {   char close_server[50];memset(close_server,0,50);
+        fgets(close_server,50,stdin);
+        close_server[strlen(close_server)-1]=0;
+        if (strcmp(close_server,"close")==0)
+        {
+            break;
+        }
+        else{
+            printf("Commande invalide. Entrez la commande \"close\" pour fermer le serveur.\n");
+        }
     }
     
-
-
     close(server_fd);
-
-
-
-
     
-    
-
+    return 1;
 }
